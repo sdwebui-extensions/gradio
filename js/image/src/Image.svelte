@@ -153,6 +153,17 @@
 			static_image = undefined;
 		}
 	}
+ 
+	$:{
+        if(tool == "color-sketch" && value != null && static_image == undefined){
+            if (value.image){
+                static_image = value.image
+            }
+            else {
+                static_image = value
+            }
+        }
+    }
 
 	$: {
 		if (cropper) {
@@ -407,3 +418,4 @@
 		transform: scaleX(-1);
 	}
 </style>
+
