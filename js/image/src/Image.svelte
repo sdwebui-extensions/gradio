@@ -33,6 +33,8 @@
 	let sketch: Sketch;
 	let cropper: Cropper;
 
+	let is_handle_save = false;
+
 	if (
 		value &&
 		(source === "upload" || source === "webcam") &&
@@ -42,6 +44,7 @@
 	}
 
 	function handle_upload({ detail }: CustomEvent<string>) {
+		console.log("handle_upload");
 		if (tool === "color-sketch") {
 			static_image = detail;
 		} else {
@@ -54,22 +57,24 @@
 	}
 
 	function handle_clear({ detail }: CustomEvent<null>) {
+		console.log("handle_clear");
 		value = null;
 		static_image = undefined;
 		dispatch("clear");
 	}
 
 	async function handle_save({ detail }: { detail: string }, initial) {
+		is_handle_save = true;
 		if (mode === "mask") {
 			if (source === "webcam" && initial) {
 				value = {
 					image: detail,
-					mask: null
+					mask: null,
 				};
 			} else {
 				value = {
 					image: typeof value === "string" ? value : value?.image || null,
-					mask: detail
+					mask: detail,
 				};
 			}
 		} else if (
@@ -101,6 +106,7 @@
 	$: dispatch("drag", dragging);
 
 	function handle_image_load(event: Event) {
+		console.log("handle image load");
 		const element = event.currentTarget as HTMLImageElement;
 		img_width = element.naturalWidth;
 		img_height = element.naturalHeight;
@@ -108,6 +114,7 @@
 	}
 
 	async function handle_sketch_clear() {
+		console.log("handle_sketch_clear");
 		sketch.clear();
 		await tick();
 		value = null;
@@ -115,6 +122,7 @@
 	}
 
 	async function handle_mask_clear() {
+		console.log("handle_mask_clear");
 		sketch.clear_mask();
 		await tick();
 	}
@@ -147,23 +155,33 @@
 	let max_width;
 
 	let static_image = undefined;
+	let last_value = null;
 
 	$: {
 		if (value === null || (value.image === null && value.mask === null)) {
 			static_image = undefined;
 		}
 	}
- 
-	$:{
-        if(tool == "color-sketch" && value != null && static_image == undefined){
-            if (value.image){
-                static_image = value.image
-            }
-            else {
-                static_image = value
-            }
-        }
-    }
+
+	async function set_value(value) {
+		last_value = value;
+		await handle_sketch_clear();
+		static_image = last_value;
+	}
+
+	$: {
+		if (is_handle_save) {
+			is_handle_save = false;
+		} else {
+			if (tool == "color-sketch" && value != null) {
+				if (static_image == undefined) {
+					static_image = value;
+				} else if (static_image != value) {
+					set_value(value);
+				}
+			}
+		}
+	}
 
 	$: {
 		if (cropper) {
@@ -418,4 +436,3 @@
 		transform: scaleX(-1);
 	}
 </style>
-
