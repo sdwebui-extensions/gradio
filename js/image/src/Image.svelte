@@ -44,7 +44,6 @@
 	}
 
 	function handle_upload({ detail }: CustomEvent<string>) {
-		console.log("handle_upload");
 		if (tool === "color-sketch") {
 			static_image = detail;
 		} else {
@@ -57,7 +56,6 @@
 	}
 
 	function handle_clear({ detail }: CustomEvent<null>) {
-		console.log("handle_clear");
 		value = null;
 		static_image = undefined;
 		dispatch("clear");
@@ -106,7 +104,6 @@
 	$: dispatch("drag", dragging);
 
 	function handle_image_load(event: Event) {
-		console.log("handle image load");
 		const element = event.currentTarget as HTMLImageElement;
 		img_width = element.naturalWidth;
 		img_height = element.naturalHeight;
@@ -114,7 +111,6 @@
 	}
 
 	async function handle_sketch_clear() {
-		console.log("handle_sketch_clear");
 		sketch.clear();
 		await tick();
 		value = null;
@@ -122,7 +118,6 @@
 	}
 
 	async function handle_mask_clear() {
-		console.log("handle_mask_clear");
 		sketch.clear_mask();
 		await tick();
 	}
